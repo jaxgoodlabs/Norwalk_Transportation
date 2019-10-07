@@ -15,6 +15,8 @@ library(ggplot2)
 #require(rgdal)
 library(sf)
 library(scales)
+library(leaflet.extras)
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
@@ -42,7 +44,9 @@ ui <- fluidPage(
                      "Number of transfers"="Number of Transfers",
                      "Total walking distance (mi.)"="Total Distance to/from transit stops")#,
                    #selected="Median_hh_income"),
-      )
+      ),
+      #check box for adding wheels2u boundery
+      checkboxInput("wheels2u","Show Wheels2U service area")
       
       
     ),
@@ -67,6 +71,9 @@ server <- function(input, output) {
   load("norwalk_stats.rData")
   #load the transit difficulties information
   load("transit_difficulties.rData")
+  
+  #load wheels2u boundary from kml
+  wheels2u_boundary<-readr::read_file("Wheels2U Boundary.kml")
   #delete row with no input in norwalk stats
   norwalk_stats<-norwalk_stats%>%filter(!is.na(Median_hh_income))%>%
     #add a column for the data in the popup
@@ -90,6 +97,10 @@ server <- function(input, output) {
   #create a reactive object out of dropdown choice
   chosen_stat<-reactive({
     paste0(input$transit_metric)
+  })
+  #create a reactive object for wheels2u boundary
+  wheels2u<-reactive({
+    input$wheels2u
   })
   
   #create frame to look up lat/lon for the chosen destination
@@ -120,7 +131,6 @@ server <- function(input, output) {
       #limit only to stat selected
       dplyr::rename("chosen_stat"=chosen_stat())
   })
-?addMarkers
   unavailable<-reactive({
     transit_difficulties[[chosen_destination()]][[chosen_departure_time()]][["unavailable"]]%>%
       #remove geometry column
@@ -146,6 +156,22 @@ server <- function(input, output) {
       setView(-73.4167485, 41.101619, 12) %>%
       addProviderTiles(provider = "Hydda.Full") 
 #        addProviderTiles(provider="CartoDB.Positron")
+  })
+  
+  #create an observer that adds a layer if the wheels2u checkbox is selected
+  observe({
+    if(wheels2u()){
+      leafletProxy({"map"})%>%
+        clearGroup("wheels2u")%>%
+        addKML(kml=wheels2u_boundary,
+                    stroke=FALSE,
+                    opacity=.3,
+                    color="blue",
+                    group="wheels2u")
+    }else{
+      leafletProxy({"map"})%>%
+        clearGroup("wheels2u")
+    }
   })
   #create  observer functions that adds the layers, so that the view doesn't change every time
   #the user changes the selections
