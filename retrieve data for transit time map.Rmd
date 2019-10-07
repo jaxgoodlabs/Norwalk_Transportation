@@ -1,0 +1,346 @@
+---
+title: "Norwalk background"
+author: "Devraj Kori"
+date: "9/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rm(list=ls())
+knitr::opts_chunk$set(echo = TRUE)
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+require(readxl)
+require(openxlsx)
+require(reshape2)
+require(scales)
+require(gridExtra)
+library(tidycensus)
+#for QWI
+library(httr)
+library(jsonlite)
+library(readr)
+library(leaflet)
+library(sf)
+library(sp)
+library(lwgeom)
+library(rvest)
+```
+
+```{r options, echo=FALSE}
+
+state_var<-"CT"
+#if only looking at selection of variables for certain categories, change to false
+#enter in the state fips code (for QWI), state FIPS codes can be found here: 
+state_fips<-"09"
+
+v17<-load_variables(2017,"acs5", cache=TRUE)
+```
+
+```{r identify_norwalk_tracts}
+test<-v17%>%filter(grepl("race",concept,ignore.case=TRUE))
+#read in norwalk census tracts
+options(scipen=999)
+norwalk_tracts<-read_csv("Norwalk CTs.csv")%>%
+  mutate(GEOID=paste0('0',GEOID))
+check<-v17%>%filter(grepl("^age",concept,ignore.case=TRUE))
+check2<-v17%>%filter(grepl("B18101",name,ignore.case=TRUE))
+#create list of vars to pull for Norwalk
+demo_stats<-c(Population="B01003_001", 
+              White="B02001_002",
+              Poverty="B17001_002",
+              Median_hh_income="B06011_001",
+              Pop_age="C18130_001", #total pop for this table is slightly off from general total
+              `Under 18`="C18108_002",
+              `Over 65`="C18108_010")
+#pull demo_stats for norwalk at the ct level
+norwalk_stats<-get_acs(variables=demo_stats,
+                       state="CT",
+                       geography="tract",
+                       year=2017,
+                       geometry=TRUE)%>%
+  select(-moe)%>%
+  filter(GEOID%in%norwalk_tracts$GEOID)%>%
+  spread(key=variable,value=estimate)%>%
+  mutate(`Poverty Rate`=Poverty/Population,
+         `Pct Non-White`=(Population-White)/Population,
+         `Pct Under 18 y.o.`=`Under 18`/Pop_age,
+         `Pct Over 65 y.o.` =`Over 65`/Pop_age)
+
+save(norwalk_stats,file="Norwalk_Proto3/norwalk_stats.rData")
+
+
+```
+#generating the random points within each census tract that will be used as starting points in google maps
+```{r random_points}
+norwalk_tract_polys<-get_acs(variables=demo_stats[1],
+                       state="CT",
+                       geography="tract",
+                       year=2017,
+                       geometry=TRUE)%>%
+  select(-moe)%>%
+  filter(GEOID%in%norwalk_tracts$GEOID)
+#create lists for each destination
+south_norwalk<-c()
+wall_west<-c()
+east_norwalk<-c()
+
+origins<-norwalk_tract_polys%>%
+  filter(estimate>0)%>%
+  select(GEOID, geometry)
+
+
+row_num<-1:nrow(origins)
+#repeat rows of destinations
+origins<-origins[rep(row_num,20),]
+#generate a random point for each row within the geometry
+# origins$lat_long<-with(origins,
+#                        spsample(geometry,n=1,"random"))
+size_vector<-rep(1,nrow(origins))
+lat_long<-origins%>%
+  st_sample(size_vector,type="random",exact=TRUE)
+#test mapping lat_long
+# lat_long%>%
+#   st_transform(crs = "+init=epsg:4326")%>%
+#   leaflet()%>%
+#   addProviderTiles(provider = "CartoDB.Positron")%>%
+#   addMarkers()
+#separate lat and long for new points generated
+lon<-c()
+lat<-c()
+for(i in 1:length(lat_long)){
+  temp<-lat_long[[i]]
+  lon<-c(lon,temp["lon"])
+  lat<-c(lat,temp["lat"])
+}
+#add them to origins
+#add in lat_long to have the option of point estimates
+origins$lat_long<-lat_long
+origins$lon<-lon
+origins$lat<-lat
+
+# #create separate datasets for aquarium and theatre
+# aquarium<-origins%>%
+#   mutate(url=paste0('https://www.google.com/maps/dir/',
+#                     lat,
+#                     ",",
+#                     lon,
+#                     "/",
+#                     "The+Maritime+Aquarium+at+Norwalk,+10+N+Water+St,+Norwalk,+CT+06854/@41.1288132,-73.4510147,13z/data=!3m1!4b1!4m13!4m12!1m0!1m5!1m1!1s0x89e81e8749bc1cd5:0x68903b30c727ef77!2m2!1d-73.4167485!2d41.101619!2m3!6e0!7e2!8j1570273200!3e3"
+#                     ))%>%
+#   arrange(GEOID)
+# theatre<-origins%>%
+#     mutate(url=paste0('https://www.google.com/maps/dir/',
+#                     lat,
+#                     ",",
+#                     lon,
+#                     "/",
+#                     "The+Maritime+Aquarium+at+Norwalk,+10+N+Water+St,+Norwalk,+CT+06854/@41.1288132,-73.4510147,13z/data=!3m1!4b1!4m13!4m12!1m0!1m5!1m1!1s0x89e81c3243db6e45:0xa45869e3de449a71!2m2!1d-73.4140074!2d41.1169647!2m3!6e0!7e2!8j1570273200!3e3"
+#                     ))%>%
+#   arrange(GEOID)
+
+#write_csv(aquarium,"aquarium_transit_data.csv")
+#write_csv(theatre,"theatre_transit_data.csv")
+
+```
+
+
+```{r maps_api}
+api_key<-"AIzaSyCy-Z6MqMpHjKUqdzqcX5gLLQeR-5wl_Ho"
+
+destinations<-c("South+Norwalk+Train+Station,+Norwalk,+CT",
+                "Wall+Street+Theatre,+Norwalk,+CT",
+                "East+Norwalk+Train+Station,+Norwalk,+CT",
+                "Mathews+Park,+Norwalk,+CT")
+
+chosen_departure_times<-c(as.POSIXct(strptime("2019-10-09 08:00:00", "%Y-%m-%d %H:%M:%S")),
+                          as.POSIXct(strptime("2019-10-12 11:00:00", "%Y-%m-%d %H:%M:%S")))
+#create list that transit info will be stored in
+transit_difficulties<-c()
+
+for(destination in destinations){
+  #create a blank list object to store the data for each destination
+  for_destination<-c()
+  for(departure_time in chosen_departure_times){
+    #create a blank list object where departure data for each time of day will be stored
+    for_departure_time<-c()
+    
+    #create blank dataframes that available/unavailable routes will be added to
+    unavailable_route=origins[0,]
+    transit_info_cols<-  #columns that will be populated by API
+      data.frame(`Total Transit Time`=c(0,0),
+                 `Number of Transfers`=c(0,0),
+                 `Total Distance to/from transit stops`=c(0,0),
+                 `Transit Lines`=c("",""),
+                check.names=FALSE)[0,]
+
+    temp<-origins[0,]
+    available_route<-cbind(
+      as.data.frame(temp),
+      as.data.frame(transit_info_cols))
+    
+    for(i in 1:nrow(origins)){
+      lat<-origins[i,]$lat
+      lon<-origins[i,]$lon
+      # destination<-"South+Norwalk+Train+Station,+Norwalk,+CT"
+      # chosen_departure_time<-as.POSIXct(strptime("2019-10-09 08:00:00", "%Y-%m-%d %H:%M:%S"))
+      url<-paste0('https://maps.googleapis.com/maps/api/directions/json?origin=',
+                  lat,",",lon,'&destination=',
+                  destination,
+                  '&departure_time=',
+                  as.integer(departure_time),
+                  '&mode=transit',
+                  '&key=',
+                  api_key)
+      #call URL
+      route_info<-GET(url)%>%content
+      #route_info
+
+      #check status of route
+      status<-route_info$status
+      if(status!="OK"){
+        #if status isn't okay, log unavailable route
+        unavailable_route<-rbind(unavailable_route,origins[i,])
+      }else{
+        #check to make sure the suggested route starts within 1.5 hours of chosen time
+        #retrieve departure time for first leg from google
+        available_departure_time<-as.POSIXct.numeric(
+          route_info$routes[[1]]$legs[[1]]$departure_time$value,
+          origin = "1970-01-01"
+        )
+        #this is an ugly solution, but make the available departure time equal to the departure time if Google maps just says to walk (no transit needed)
+        if(length(available_departure_time)==0){
+          available_departure_time<-departure_time
+        }
+        if(available_departure_time-departure_time>90){
+          unavailable_route<-rbind(unavailable_route,origins[i,])
+        }else{
+          #we've confirmed that there is an available route within 1:30 of chosen departure time
+          #now we can extract info
+          #find the length of steps
+          steps<-route_info$routes[[1]]$legs[[1]]$steps
+          walking_steps<-c()
+          transit_steps<-c()
+          for(j in 1:length(steps)){
+            step<-steps[[j]]
+            if(step$travel_mode=="WALKING"){
+              #if the step is a walking step, add the distance to walking steps
+              walking_steps<-c(walking_steps,step$distance$value)
+        
+            }else if(step$travel_mode=="TRANSIT"){
+              #if the step is a transit step, add the name of the line to transit steps
+              transit_steps<-c(transit_steps,step$transit_details$line$name)
+            }
+          
+          }
+          total_transit_time<-route_info$routes[[1]]$legs[[1]]$duration$value/60
+          walking_distance<-sum(walking_steps)
+          transfers<-max(length(transit_steps)-1,0)
+          transit_lines<-paste(transit_steps,collapse=", ")
+          #check if the walking distance is greater than a mile, and if it is, put it in unavailable
+          if(walking_distance>1609.34){
+            unavailable_route<-rbind(unavailable_route,origins[i,])
+          }else{
+          #create a temp frame to be appended to the available routes frame
+            temp_frame<-origins[i,]
+            temp_frame$`Total Transit Time`<-total_transit_time
+            temp_frame$`Number of Transfers`<-transfers
+            temp_frame$`Total Distance to/from transit stops`<-walking_distance
+            #check if there are no transit lines, and if none, just say "walking only"
+            if(length(transit_steps)==0){transit_lines<-"walking only"}
+            temp_frame$`Transit Lines`<-transit_lines
+            #add temp_frame to available routes
+            available_route<-rbind(as.data.frame(available_route),
+                                   as.data.frame(temp_frame))
+            
+          }
+
+          }
+      }
+    }
+    #store these results in the list object
+    for_departure_time[["available"]]<-available_route
+    for_departure_time[["unavailable"]]<-unavailable_route
+    #add for departure time to the destination list object
+    for_destination[[paste0(departure_time)]]<-for_departure_time
+  }
+  #add for destination to transit_difficulties
+  transit_difficulties[[paste0(destination)]]<-for_destination
+}
+
+#lon<-73.4348276
+#lat<-41.1519014
+#save the transit difficulties
+save(transit_difficulties,
+     file="Norwalk_Proto3/transit_difficulties.rData")
+
+
+```
+
+```{r test_map}
+load("Norwalk_Proto3/transit_difficulties.rData")
+available<-transit_difficulties[[1]][[1]][["available"]]%>%
+  #dplyr::rename("chosen_stat"="Total Transit Time")%>%
+  select(-geometry)%>%
+      #add a column for the data in the popup
+      mutate(pop_up=paste(sep="<br/>",
+                          paste0("<b>Total Transit Time:</b> ",`Total Transit Time`),
+                          paste0("<b>Number of Transfers: </b>",`Number of Transfers`),
+                          paste0("<b>Total Distance to/from transit stops: </b>", `Total Distance to/from transit stops`),
+                          paste0("<b>Transit Lines Used: </b>", `Transit Lines`)))
+pal<-colorNumeric(palette = "RdYlGn", 
+                   domain = available$chosen_stat, n = nrow(available),
+                  reverse=TRUE)
+  icons <- awesomeIconList(
+    times_circle = makeAwesomeIcon(icon = "times-circle", library = "fa", markerColor = "red")
+  )
+pal<-colorNumeric(palette = "RdYlGn", 
+                        domain = available$`Total Transit Time`, #n = nrow(available()),
+                        reverse=TRUE)
+leaflet(width = "50%")%>%
+      setView(-73.4167485, 41.101619, 11.25) %>%
+      addProviderTiles(provider = "CartoDB.Positron")%>%
+      addCircleMarkers(data=available,popup=~pop_up,
+                       color=~pal(`Total Transit Time`),
+                       group="unavail")
+```
+scraping each google maps link
+```{r scraping_google_maps}
+#aquarium[1,]$url
+api_key="AIzaSyCy-Z6MqMpHjKUqdzqcX5gLLQeR-5wl_Ho"
+lat<-41.06234
+lon<--73.43258
+#construct api url
+depart_time<-as.POSIXct.numeric(1570624902,origin = "1970-01-01")
+test_date<-as.POSIXct(strptime("2019-10-12 11:00:00", "%Y-%m-%d %H:%M:%S"))
+as.integer(test_date)
+
+as.Date(test_date,"%m/%d/%Y")==as.Date(depart_time,origin = "1970-01-01","%m/%d/%Y")
+check<-depart_time-test_date
+
+url<-paste0('https://maps.googleapis.com/maps/api/directions/json?origin=',
+            lat,",",lon,'&destination=',
+            "South+Norwalk+Train+Station,+Norwalk,+CT",
+            '&departure_time=',
+            as.integer(test_date),
+            '&mode=transit',
+            '&key=',
+            api_key)
+
+test_call<-GET(url=url)
+# test_call%>%content
+test_call2<-test_call%>%content
+test_call2$status
+# steps<-test_call2$routes[[1]]$legs[[1]]$steps
+# 
+# for(i in 1:length(steps)){
+#  print(
+#    paste(steps[[i]]$travel_mode,
+#          steps[[i]]$distance$text,
+#          steps[[i]]$duration$text,
+#          sep=", "))
+# }
+```
