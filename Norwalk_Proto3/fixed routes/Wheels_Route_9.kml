@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>Wheels_Route_9.kml</name>
+	<open>1</open>
+	<Style id="s_ylw-pushpin_hl0">
+		<LineStyle>
+			<color>ff00aa00</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<Style id="s_ylw-pushpin0">
+		<LineStyle>
+			<color>ff00aa00</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<StyleMap id="m_ylw-pushpin1">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin_hl00">
+		<LineStyle>
+			<color>ff00aa00</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<StyleMap id="m_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin1</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl00</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<LineStyle>
+			<color>ff00aa00</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<Style id="s_ylw-pushpin_hl">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<LineStyle>
+			<color>ff00aa00</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<Style id="s_ylw-pushpin1">
+		<LineStyle>
+			<color>ff00aa00</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<StyleMap id="m_ylw-pushpin0">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin0</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl0</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Folder id="FeatureLayer0">
+		<name>Wheels_Route_9</name>
+		<open>1</open>
+		<Snippet maxLines="0"></Snippet>
+		<Placemark>
+			<name>1</name>
+			<styleUrl>#m_ylw-pushpin0</styleUrl>
+			<LineString>
+				<coordinates>
+					-73.41446999999999,41.11864,0 -73.41585000000001,41.11759,0 -73.41566,41.1175,0 -73.41519,41.11705,0 -73.41492,41.11655,0 -73.41483,41.11614,0 -73.41502,41.11531,0 -73.41528,41.11425,0 -73.41565,41.1133,0 -73.41616000000001,41.11236,0 -73.41674638576775,41.11158030225361,0 -73.41787533565089,41.1116662110773,0 -73.41868268171714,41.11170207136819,0 -73.41974161902365,41.11176824780365,0 -73.42011650233859,41.11184235287366,0 -73.42047030144306,41.11197208008025,0 -73.42084605534997,41.11217970438801,0 -73.42122989534406,41.11241905843534,0 -73.42156971260521,41.11256295264824,0 -73.42198480653904,41.11267682080933,0 -73.42236482951039,41.1127162839034,0 -73.4231821917373,41.11272468113437,0 -73.42480268418974,41.11272408473759,0 -73.42553195663633,41.11268737526662,0 -73.42658125057986,41.11257462727084,0 -73.4260642435743,41.11175562845872,0 -73.42547054175769,41.11093008683323,0 -73.42501704552268,41.11040386451563,0 -73.42480350396204,41.11011149614605,0 -73.42426941833112,41.10893765573029,0 -73.42343909794026,41.10706471583205,0 -73.42903864198568,41.10518659014683,0 -73.42891397571158,41.10497883931618,0 -73.42870217323839,41.10485005971233,0 -73.4271256019485,41.10411253948347,0 -73.42671400993788,41.10399533052861,0 -73.42603711993857,41.10390504396131,0 -73.42563728414545,41.10391215625981,0 -73.42495442864936,41.10410739683925,0 -73.42422077365535,41.1019393472687,0 -73.42378312170797,41.10105491632934,0 -73.42348276550746,41.10062191209246,0 -73.42301181296456,41.09997551683829,0 -73.42210785339195,41.09945596086114,0 -73.42260754357561,41.0981614697362,0 -73.42333964755663,41.0966861909864,0 -73.41769773168682,41.09658161819402,0 -73.41694124805886,41.09641018525834,0 -73.41575337990456,41.09638944159818,0 -73.41488345712935,41.09205046471388,0 -73.41512681518549,41.09194632529894,0 -73.41537183293855,41.09172014035865,0 -73.41574653486937,41.09153747236239,0 -73.41690901648299,41.09147248866135,0 -73.41705564680085,41.09168254241294,0 -73.41754911040324,41.09214563458696,0 -73.41909510096562,41.09333806401442,0 -73.41903560084776,41.09529604209966,0 -73.41700515730254,41.09526720720259,0 -73.41700875236485,41.0964263552044,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark>
+			<name>2</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<LineString>
+				<coordinates>
+					-73.41484,41.11619,0 -73.41455000000001,41.11667,0 -73.41423,41.11705,0 -73.41329,41.11791,0 -73.41446999999999,41.11863,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark>
+			<name>3</name>
+			<styleUrl>#m_ylw-pushpin1</styleUrl>
+			<LineString>
+				<tessellate>1</tessellate>
+				<coordinates>
+					-73.42004804159744,41.11182864009938,0 -73.42011748376422,41.11103529047467,0 -73.42023627031226,41.11078516432301,0 -73.42065506441672,41.11049075268191,0 -73.42312916855269,41.11022142036851,0 -73.42400743935805,41.11017767768866,0 -73.42452403749525,41.11025382676381,0 -73.42482330936993,41.11033514854884,0 -73.42484249938256,41.11017580958812,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

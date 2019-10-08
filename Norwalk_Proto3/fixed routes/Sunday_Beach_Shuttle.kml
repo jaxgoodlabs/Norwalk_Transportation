@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>Sunday_Beach_Shuttle.kml</name>
+	<open>1</open>
+	<StyleMap id="m_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin">
+		<LineStyle>
+			<color>ffe12e9c</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<Style id="s_ylw-pushpin_hl">
+		<LineStyle>
+			<color>ffe12e9c</color>
+			<width>3</width>
+		</LineStyle>
+	</Style>
+	<Folder id="FeatureLayer0">
+		<name>Sunday_Beach_Shuttle</name>
+		<Snippet maxLines="0"></Snippet>
+		<Placemark>
+			<name>1</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<LineString>
+				<coordinates>
+					-73.4145,41.11859,0 -73.41584,41.11759,0 -73.41567000000001,41.1175,0 -73.41526,41.11716,0 -73.41491000000001,41.11651,0 -73.41468999999999,41.11658,0 -73.41446999999999,41.11675,0 -73.41416,41.11712,0 -73.41328,41.11792,0 -73.41248,41.11816,0 -73.41182000000001,41.11853,0 -73.41133000000001,41.11852,0 -73.41064,41.1184,0 -73.41014,41.11802,0 -73.40828000000001,41.11768,0 -73.40806000000001,41.11701,0 -73.4078,41.11597,0 -73.40769,41.11549,0 -73.40767,41.11291,0 -73.40770000000001,41.11215,0 -73.40763,41.11154,0 -73.40751,41.11103,0 -73.40734000000001,41.11052,0 -73.40678,41.1095,0 -73.40603,41.10832,0 -73.40575,41.10785,0 -73.40469,41.1048,0 -73.40376999999999,41.10198,0 -73.40353,41.10191,0 -73.40253,41.10199,0 -73.40217,41.10197,0 -73.40175000000001,41.10182,0 -73.40143999999999,41.10158,0 -73.40124,41.10122,0 -73.40057,41.09897,0 -73.39986,41.09711,0 -73.39957,41.09633,0 -73.39917,41.09529,0 -73.39875000000001,41.09531,0 -73.39839000000001,41.09536,0 -73.39805,41.09532,0 -73.39784,41.09522,0 -73.39675,41.09401,0 -73.3964,41.09365,0 -73.39575000000001,41.09243,0 -73.39534,41.09105,0 -73.39496,41.08985,0 -73.39457,41.0884,0 -73.39411,41.08756,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark>
+			<name>2</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<LineString>
+				<coordinates>
+					-73.41198,41.11844,0 -73.41278,41.11938,0 -73.41455000000001,41.11857,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark>
+			<name>3</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<LineString>
+				<coordinates>
+					-73.40175000000001,41.10183,0 -73.40261,41.10242,0 -73.40304999999999,41.10277,0 -73.40398999999999,41.10324,0 -73.40431,41.10362,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>
