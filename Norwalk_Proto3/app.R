@@ -46,7 +46,7 @@ ui <- fluidPage(
       radioButtons("destination",
                    "Destination",
                    c("South Norwalk Train Station"="South+Norwalk+Train+Station,+Norwalk,+CT",
-                     "Wall Street Theatre / Wall West"="Wall+Street+Theatre,+Norwalk,+CT",
+                     "Arts District / Wall West"="Wall+Street+Theatre,+Norwalk,+CT",
                      "East Norwalk Train Station"="East+Norwalk+Train+Station,+Norwalk,+CT",
                      "Mathew's Park"="Mathews+Park,+Norwalk,+CT")),
       #radio buttons to choose departure time
@@ -80,10 +80,11 @@ ui <- fluidPage(
     
     # Show the map
     mainPanel("In the map below, the color of each dot indicates the difficulty of using public transit to get
-              from that area to the selected destination. A red X indicates no public transit options are 
-available within 1.5 hours of the chosen departure time that require less than 1 total mile of walking to and from stops.",
+              from the dot's location to the selected destination. A red X indicates no public transit options that require less than 1 total mile of walking to and from stops are 
+available within 1.5 hours of the chosen departure time.",
               leafletOutput("map"),
-              "Click on a dot to view route information. Click between dots to reveal demographic information for the area. Estimates obtained using the Google Maps API"
+              "Click on a dot to view route information. Click between dots to reveal demographic information for the area. 
+              Estimates obtained using the Google Maps Directions API for October 9th, 2019 and October 12th, 2019."
     )
     )
   )

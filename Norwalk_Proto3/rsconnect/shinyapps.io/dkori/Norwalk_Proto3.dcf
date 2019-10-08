@@ -5,8 +5,8 @@ account: dkori
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1293298
-bundleId: 2478792
+bundleId: 2480477
 url: https://dkori.shinyapps.io/Norwalk_Proto3/
-when: 1570508318.30764
+when: 1570548730.19668
 asMultiple: FALSE
 asStatic: FALSE
