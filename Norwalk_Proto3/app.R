@@ -17,6 +17,14 @@ library(sf)
 library(scales)
 library(leaflet.extras)
 
+#create list of fixed routes
+fixed_route_list<-list.files("fixed routes/")
+#make the names of fixed route list human readable
+names(fixed_route_list)<-gsub('_',' ',fixed_route_list)
+#remove .kml from the end each name
+names(fixed_route_list)<-gsub('\\.kml','',names(fixed_route_list))
+#add "none" to fixed route list
+fixed_route_list[["none"]]<-"none"
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
@@ -46,18 +54,21 @@ ui <- fluidPage(
                    #selected="Median_hh_income"),
       ),
       #check box for adding wheels2u boundery
-      checkboxInput("wheels2u","Show Wheels2U service area")
-      
+      checkboxInput("wheels2u","Show Wheels2U service area"),
+      #add selector for fixed route lines
+      selectInput("fixed_route",
+                  "Show a Bus/Shuttle Line",
+                  choices=fixed_route_list,
+                  selected="none")
       
     ),
     
     # Show the map
     mainPanel("In the map below, the color of each dot indicates the difficulty of using public transit to get
               from that area to the selected destination. A red X indicates no public transit options are 
-available within 1.5 hours of the chosen departure time that require less than 1 total mile of walking to and from stops.
-              Click between dots to view demographic information for the area.",
+available within 1.5 hours of the chosen departure time that require less than 1 total mile of walking to and from stops.",
               leafletOutput("map"),
-              "Estimates obtained using the Google Maps API"
+              "Click on a dot to view route information. Click between dots to reveal demographic information for the area. Estimates obtained using the Google Maps API"
     )
     )
   )
@@ -74,6 +85,8 @@ server <- function(input, output) {
   
   #load wheels2u boundary from kml
   wheels2u_boundary<-readr::read_file("Wheels2U Boundary.kml")
+  
+
   #delete row with no input in norwalk stats
   norwalk_stats<-norwalk_stats%>%filter(!is.na(Median_hh_income))%>%
     #add a column for the data in the popup
@@ -102,7 +115,10 @@ server <- function(input, output) {
   wheels2u<-reactive({
     input$wheels2u
   })
-  
+  #create a reactive object for bus line choice
+  fixed_route<-reactive({
+    input$fixed_route
+  })
   #create frame to look up lat/lon for the chosen destination
   destination_layer<-reactive({
     lookup_frame<-data.frame(destinations=c("South+Norwalk+Train+Station,+Norwalk,+CT",
@@ -173,7 +189,26 @@ server <- function(input, output) {
         clearGroup("wheels2u")
     }
   })
-  #create  observer functions that adds the layers, so that the view doesn't change every time
+  
+  #create an observer that adds the selected fixed route line if one is selected
+  observe({
+    if(fixed_route()!="none"){
+      #load the selected file
+      chosen_fixed_route<-readr::read_file(paste0("fixed routes/",fixed_route()))
+      leafletProxy({"map"})%>%
+        clearGroup("fixed")%>%
+        addKML(kml=chosen_fixed_route,
+               weight=5,
+               smoothFactor=0,
+               color="#000000",
+               fillOpacity=0.0,group="fixed")
+    }else{
+      leafletProxy({"map"})%>%
+        clearGroup("fixed")
+    }
+  })
+
+    #create  observer functions that adds the layers, so that the view doesn't change every time
   #the user changes the selections
   #add the clear polygon layer to allow revealing demographic stats
   observe({
