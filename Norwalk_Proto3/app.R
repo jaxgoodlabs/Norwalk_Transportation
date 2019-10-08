@@ -12,7 +12,6 @@ library(dplyr)
 library(leaflet)
 library(tidyr)
 library(ggplot2)
-#require(rgdal)
 library(sf)
 library(scales)
 library(leaflet.extras)
@@ -25,6 +24,15 @@ names(fixed_route_list)<-gsub('_',' ',fixed_route_list)
 names(fixed_route_list)<-gsub('\\.kml','',names(fixed_route_list))
 #add "none" to fixed route list
 fixed_route_list[["none"]]<-"none"
+
+#create a list of parking assets
+parking_list<-list.files("parking/",pattern="*shx")
+#make the names of parking features human readable
+names(parking_list)<-gsub('_',' ',parking_list)
+#remove file extensions from names
+names(parking_list)<-gsub('\\.shx','',names(parking_list))
+#add "none" to the list of parking features
+parking_list[["none"]]<-"none"
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
@@ -45,7 +53,8 @@ ui <- fluidPage(
       radioButtons("departure_time",
                    "Departure Time",
                    c("Saturday, 11am"="1570892400",
-                     "Wednesday, 8am"="1570622400")),
+                     "Wednesday, 8am"="1570622400"),
+                   selected="1570622400"),
       radioButtons("transit_metric",
                    "Measure of Public Transit Difficulty",
                    c("Trip time (min)"="Total Transit Time",
@@ -59,7 +68,13 @@ ui <- fluidPage(
       selectInput("fixed_route",
                   "Show a Bus/Shuttle Line",
                   choices=fixed_route_list,
+                  selected="none"),
+      #add selector for parking features
+      selectInput("parking",
+                  "Show Parking Feature",
+                  choices=parking_list,
                   selected="none")
+      
       
     ),
     
@@ -118,6 +133,11 @@ server <- function(input, output) {
   #create a reactive object for bus line choice
   fixed_route<-reactive({
     input$fixed_route
+  })
+  
+  #create a reactive object for parking feature choice
+  parking<-reactive({
+    input$parking
   })
   #create frame to look up lat/lon for the chosen destination
   destination_layer<-reactive({
@@ -208,8 +228,6 @@ server <- function(input, output) {
     }
   })
 
-    #create  observer functions that adds the layers, so that the view doesn't change every time
-  #the user changes the selections
   #add the clear polygon layer to allow revealing demographic stats
   observe({
     leafletProxy("map")%>%
@@ -228,7 +246,41 @@ server <- function(input, output) {
       addMarkers(data=destination_layer(),
                  group="destination")
   })
+  #create parking icon
+  parkIcon <- makeIcon(
+    iconUrl = "hiclipart.com-id_duloh.png",
+    iconWidth = 15, iconHeight = 15#,
+    # iconAnchorX = 22, iconAnchorY = 94,
+  )
   
+  #add parking layer to map based on selection
+  observe({
+    if(parking()!="none"){
+      if(parking()%in%c("On_Street_Parking.shx","Surface_Lots.shx")){
+        chosen_parking_feature<-read_sf(paste0("parking/",parking()))%>%
+          st_transform(crs = "+init=epsg:4326")%>%
+          mutate(pop_up=paste(sep="<br/>",
+                              paste0("<b>Days Available:</b> ",OPERDAYS),
+                              paste0("<b>Access Type: </b>",`ACCESSTYPE`),
+                              paste0("<b>Maximum Duration: </b>",PARKDUR),
+                              paste0("<b>Space Type: </b>", `SPACETYPE`)))
+      }else{
+        chosen_parking_feature<-read_sf(paste0("parking/",parking()))%>%
+          st_transform(crs = "+init=epsg:4326")%>%
+          mutate(pop_up=Creator)
+      }
+
+      leafletProxy("map")%>%
+        clearGroup("parking")%>%
+        addMarkers(data=chosen_parking_feature, popup=~pop_up,
+                   icon=parkIcon,
+                   group="parking")
+    }else{
+      leafletProxy("map")%>%
+        clearGroup("parking")
+    }
+
+  })
   #create redx icon
   redX <- makeIcon(
     iconUrl = "hiclipart.com-id_xdgeh.png",
@@ -243,7 +295,7 @@ server <- function(input, output) {
                  icon=redX,
                  group="unavail")
   })
-  #add the layer for available routes
+    #add the layer for available routes
   observe({
     leafletProxy("map")%>%
       clearGroup("avail")%>%

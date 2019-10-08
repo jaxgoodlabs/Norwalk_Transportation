@@ -310,7 +310,7 @@ leaflet(width = "50%")%>%
 scraping each google maps link
 ```{r scraping_google_maps}
 #aquarium[1,]$url
-api_key="AIzaSyCy-Z6MqMpHjKUqdzqcX5gLLQeR-5wl_Ho"
+api_key=""
 lat<-41.06234
 lon<--73.43258
 #construct api url
