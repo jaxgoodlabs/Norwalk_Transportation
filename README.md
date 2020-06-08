@@ -1,10 +1,9 @@
 # ReadMe
 
-This document details the contents of the Final Hand-off folder.
+This document details the contents of the Norwalk Transportation repository.
 
 ## Documentation
 
-The Documentation folder contains the following files:
 1. Project Overview - A high-level project overview document outlining the overall objectives of the project, key stakeholders, our first thoughts on tackling the project, opportunities if the project goes well, and risks if the project doesn’t go well.
 2. Research Plan - A document detailing our user recruitment strategy and interview guide.
 3. Research Report - A document synthesizing our user research into common themes, key insights, and high impact opportunities. 
@@ -13,7 +12,6 @@ The Documentation folder contains the following files:
 
 ## Products
 
-The Products folder contains the following files:
 1. Minimum Viable Product slide deck - A concise presentation of the team’s final products and associated recommendations. 
 2. Final Product How-To Guides - A collection of 1-page How-To Guides for each of the final products, including:
 3. User Journey Map
